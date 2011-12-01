@@ -94,7 +94,7 @@
 
 - (void)codaDocumentSavedNotification:(NSNotification*)notification
 {
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"com_nearearth_CodaSassPlugin_MonitorSave"])
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"CodaSassPlugin_MonitorSave"])
 		return;
 	
 	// The object for TSWrapperDidSaveNotification is currently a subclass of NSDocument.

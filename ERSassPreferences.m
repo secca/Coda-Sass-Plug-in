@@ -24,7 +24,7 @@
 {
 	self = [super init];
 	
-	if ([NSBundle loadNibNamed:@"NESassPreferences" owner:self])
+	if ([NSBundle loadNibNamed:@"ERSassPreferences" owner:self])
 	{
 	}
 	else
