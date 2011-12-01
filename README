@@ -2,11 +2,22 @@ This is a Sass plug-in for Panic's Coda.
 
 This plug-in converts scss files into css files. You can set it up to automatically convert on save. By default you must manually process scss files via the Coda Plug-ins menu.
 
+
+To Install, copy Sass.codaplugin to the folder:
+<your home folder>/Library/Application Support/Coda/Plug-ins
+
+If you can't see your Library folder under Mac OS X Lion, hold down the option key and then select Library from the Go menu in the Finder.
+
+
 To find out more about Coda:
 http://panic.com/coda/
 
 To find out more about Sass:
 http://sass-lang.com/
+
+Help:
+http://sites.google.com/site/codasassplugin/
+codsassplugin@gmail.com
 
 
 This plug-in is released under the MIT License.
