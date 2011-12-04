@@ -20,12 +20,13 @@
 @implementation ERSassPreferences
 
 
-- (id) init
+- (id)init
 {
 	self = [super init];
 	
 	if ([NSBundle loadNibNamed:@"ERSassPreferences" owner:self])
 	{
+		[[NSUserDefaultsController sharedUserDefaultsController] addObserver:self forKeyPath:@"values.ERSassPlugin_UserSaveFolderPath" options:0 context:NULL];
 	}
 	else
 	{
@@ -37,15 +38,26 @@
 }
 
 
-- (void) dealloc
+- (void)dealloc
 {
 	[prefWindow close];
+	[[NSUserDefaultsController sharedUserDefaultsController] removeObserver:self forKeyPath:@"values.ERSassPlugin_UserSaveFolderPath"];
 	
 	[super dealloc];
 }
 
 
-- (void) runModal
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+	if ([keyPath isEqualToString:@"values.ERSassPlugin_UserSaveFolderPath"])
+	{
+		if ([[NSUserDefaults standardUserDefaults] stringForKey:@"ERSassPlugin_UserSaveFolderPath"].length == 0)
+			[[NSUserDefaults standardUserDefaults] setInteger:0 forKey:@"ERSassPlugin_UserSaveFolderPathRelativeMode"];
+	}
+}
+
+
+- (void)runModal
 {
 	[NSApp runModalForWindow:prefWindow];
 	[prefWindow orderOut:self];
@@ -55,6 +67,12 @@
 - (IBAction)ok:(id)sender
 {
 	[NSApp stopModalWithCode:NSOKButton];
+}
+
+
+- (void)support:(id)sender
+{
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"mailto:codasassplugin@gmail.com"]];
 }
 
 

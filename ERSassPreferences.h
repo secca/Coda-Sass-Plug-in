@@ -24,5 +24,6 @@
 - (void) runModal;
 
 - (IBAction)ok:(id)sender;
+- (IBAction)support:(id)sender;
 
 @end

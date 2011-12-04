@@ -20,6 +20,11 @@
 
 @class CodaPlugInsController;
 
+enum {
+	SaveRelativeToScssFile = 0,
+	SaveAbsolute
+};
+
 @interface ERSassPlugIn : NSObject <CodaPlugIn>
 {
 	CodaPlugInsController	*controller;
@@ -30,6 +35,6 @@
 
 - (NSString*)currentEditedScssPath;
 - (BOOL)isPathScss:(NSString*)filePath;
-- (void)generateCssForPath:(id)scssPath;
+- (void)generateCssForPath:(NSString*)scssPath;
 
 @end

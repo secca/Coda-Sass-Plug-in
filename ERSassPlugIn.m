@@ -29,6 +29,10 @@
 		controller = inController;
 		sassPluginBundle = aBundle;
 		
+		// Migration of a default to a more correct key name.
+		if ([[NSUserDefaults standardUserDefaults] valueForKey:@"CodaSassPlugin_MonitorSave"] != nil && [[NSUserDefaults standardUserDefaults] valueForKey:@"ERSassPlugin_MonitorSave"] == nil)
+			[[NSUserDefaults standardUserDefaults] setValue:[[NSUserDefaults standardUserDefaults] valueForKey:@"CodaSassPlugin_MonitorSave"] forKey:@"ERSassPlugin_MonitorSave"];
+		
 		[controller registerActionWithTitle:NSLocalizedString(@"Convert Scss to Css", @"Convert Scss to Css")
 					  underSubmenuWithTitle:nil
 									 target:self
@@ -94,7 +98,7 @@
 
 - (void)codaDocumentSavedNotification:(NSNotification*)notification
 {
-	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"CodaSassPlugin_MonitorSave"])
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"ERSassPlugin_MonitorSave"])
 		return;
 	
 	// The object for TSWrapperDidSaveNotification is currently a subclass of NSDocument.
@@ -131,7 +135,72 @@
 }
 
 
-- (void)generateCssForPath:(__block id)scssPath
+- (NSString*)cssPathForScssPath:(NSString*)scssPath
+{
+	// Default css path is next to the scss path
+	NSString	*cssPath = [[scssPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"css"];
+	
+	NSString	*cssUserSaveFolderPath = [[NSUserDefaults standardUserDefaults] stringForKey:@"ERSassPlugin_UserSaveFolderPath"];
+	if (cssUserSaveFolderPath.length != 0)
+	{
+		NSString	*cssFolderPath = nil;
+		
+		int relativePathMode = [[NSUserDefaults standardUserDefaults] integerForKey:@"ERSassPlugin_UserSaveFolderPathRelativeMode"];
+		if (relativePathMode == SaveRelativeToScssFile)
+		{
+			cssFolderPath = [[scssPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:cssUserSaveFolderPath];
+		}
+		else if (relativePathMode == SaveAbsolute)
+		{
+			cssFolderPath = [cssUserSaveFolderPath stringByExpandingTildeInPath];
+		}
+		
+		if (![[NSFileManager defaultManager] fileExistsAtPath:cssFolderPath])
+		{
+			if ([[NSUserDefaults standardUserDefaults] boolForKey:@"ERSassPlugin_CreateUserSaveFolder"])
+			{
+				if (![[NSFileManager defaultManager] createDirectoryAtPath:cssFolderPath withIntermediateDirectories:YES attributes:nil error:NULL])
+				{
+					NSAlert	*alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Css save folder does not exist and can't be created.",@"Css save folder does not exist and can't be created.")
+													 defaultButton:NSLocalizedString(@"OK",@"OK")
+												   alternateButton:nil
+													   otherButton:nil
+										 informativeTextWithFormat:cssFolderPath];
+					[alert runModal];
+					return nil;
+				}
+			}
+			else
+			{
+				NSAlert	*alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Css save folder does not exist.",@"Css save folder does not exist.")
+												 defaultButton:NSLocalizedString(@"OK",@"OK")
+											   alternateButton:nil
+												   otherButton:nil
+									 informativeTextWithFormat:cssFolderPath];
+				[alert runModal];
+				return nil;
+			}
+		}
+		else if (![[NSFileManager defaultManager] isWritableFileAtPath:cssFolderPath])
+		{
+			NSAlert	*alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Unable to save to the css folder.",@"Unable to save to the css folder")
+											 defaultButton:NSLocalizedString(@"OK",@"OK")
+										   alternateButton:nil
+											   otherButton:nil
+								 informativeTextWithFormat:cssFolderPath];
+			[alert runModal];
+			return nil;
+		}
+		
+		NSString	*scssBaseFileName = [[scssPath lastPathComponent] stringByDeletingPathExtension];
+		cssPath = [[cssFolderPath stringByAppendingPathComponent:scssBaseFileName] stringByAppendingPathExtension:@"css"];
+	}
+	
+	return cssPath;
+}
+
+
+- (void)generateCssForPath:(NSString*)scssPath
 {
 	if (scssPath == nil) return;
 	
@@ -146,7 +215,11 @@
 		return;
 	}
 	
-	NSString	*cssPath = [[scssPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"css"];
+	
+	NSString	*cssPath = [self cssPathForScssPath:scssPath];
+	if (cssPath == nil)
+		return;
+	
 	NSTask		*sassTask = [[NSTask alloc] init];
 	[sassTask setLaunchPath:@"/usr/bin/sass"];
 	[sassTask setCurrentDirectoryPath:[scssPath stringByDeletingLastPathComponent]];
@@ -160,7 +233,7 @@
 										 defaultButton:NSLocalizedString(@"OK",@"OK")
 									   alternateButton:nil
 										   otherButton:nil
-							 informativeTextWithFormat:scssPath];
+							 informativeTextWithFormat:@"Scss: %@\n\nCss:%@", scssPath, cssPath];
 		[alert runModal];
 	}
 	
