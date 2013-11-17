@@ -48,9 +48,9 @@
 							  keyEquivalent:nil
 								 pluginName:[self name]];
 		
-		// TSWrapperDidSaveNotification was derived by observing notifications being sent in Coda.
+		// CodaDocumentDidSaveNotification was derived by observing notifications being sent in Coda.
 		// This could change in future versions of Coda.
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(codaDocumentSavedNotification:) name:@"TSWrapperDidSaveNotification" object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(codaDocumentSavedNotification:) name:@"CodaDocumentDidSaveNotification" object:nil];
 		
 	}
 	
@@ -101,7 +101,7 @@
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"ERSassPlugin_MonitorSave"])
 		return;
 	
-	// The object for TSWrapperDidSaveNotification is currently a subclass of NSDocument.
+	// The object for CodaDocumentDidSaveNotification is currently a subclass of NSDocument.
 	// This could change in future versions of Coda. Sanity check the object before using.
 	NSDocument	*document = [notification object];
 	if (document == nil || ![document isKindOfClass:[NSDocument class]])
