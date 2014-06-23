@@ -19,6 +19,8 @@ Help:
 http://sites.google.com/site/codasassplugin/
 codasassplugin@gmail.com
 
+Version 1.0.2
+- Added ability to specify output format in Sass Preferences.
 
 Version 1.0.1
 - Added ability to specify where to save css files.

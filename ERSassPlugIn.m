@@ -219,11 +219,24 @@
 	NSString	*cssPath = [self cssPathForScssPath:scssPath];
 	if (cssPath == nil)
 		return;
+    
+    NSString *outputStyle = @"nested";
+    switch ([[NSUserDefaults standardUserDefaults] integerForKey:@"ERSassPlugin_UserOutputStyle"]) {
+        case 1:
+            outputStyle = @"expanded";
+            break;
+        case 2:
+            outputStyle = @"compact";
+            break;
+        case 3:
+            outputStyle = @"compressed";
+            break;
+    }
 	
 	NSTask		*sassTask = [[NSTask alloc] init];
 	[sassTask setLaunchPath:@"/usr/bin/sass"];
 	[sassTask setCurrentDirectoryPath:[scssPath stringByDeletingLastPathComponent]];
-	[sassTask setArguments:[NSArray arrayWithObjects:[NSString stringWithFormat:@"%@:%@",scssPath,cssPath], nil]];
+	[sassTask setArguments:[NSArray arrayWithObjects:[NSString stringWithFormat:@"%@:%@", scssPath, cssPath], @"--style", outputStyle, nil]];
 	
 	[sassTask launch];
 	[sassTask waitUntilExit];
